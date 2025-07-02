@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligentes Regal - Kassensystem</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kassen_style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-cash-register me-2"></i>
+                Intelligentes Regal - Kassensystem
+            </a>
+            <div class="navbar-text text-light" id="status-display">
+                <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Verbunden</span>
+                <span class="ms-2">Letzte Aktualisierung: <span id="last-update">{{ last_update }}</span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-basket me-2"></i>
+                            Unbezahlte Artikel
+                        </h5>
+                        <div class="header-actions">
+                            <span class="total-display me-3">Gesamtsumme: <span id="total-sum">{{ "%.2f"|format(total_sum) }}</span> €</span>
+                            <button class="btn btn-sm btn-light" id="refresh-btn">
+                                <i class="bi bi-arrow-clockwise me-1"></i>
+                                Aktualisieren
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="unpaid-items-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40px;">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="select-all">
+                                            </div>
+                                        </th>
+                                        <th>Regal</th>
+                                        <th>Produkt</th>
+                                        <th>Zeit</th>
+                                        <th>Menge</th>
+                                        <th>Preis</th>
+                                        <th>Gesamt</th>
+                                        <th>Aktionen</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in unpaid_items %}
+                                    <tr data-event-id="{{ item.event_id }}">
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input item-checkbox" type="checkbox" value="{{ item.event_id }}">
+                                            </div>
+                                        </td>
+                                        <td>Regal {{ item.shelf_id }}</td>
+                                        <td>{{ item.product_name }}</td>
+                                        <td>{{ item.time }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>{{ "%.2f"|format(item.price) }} €</td>
+                                        <td>{{ "%.2f"|format(item.total) }} €</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success pay-single-btn" data-event-id="{{ item.event_id }}">
+                                                <i class="bi bi-cash me-1"></i>
+                                                Bezahlen
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% if not unpaid_items %}
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            Keine unbezahlten Artikel vorhanden
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <span class="selected-items-count">0 Artikel ausgewählt</span>
+                        <div>
+                            <button class="btn btn-primary" id="pay-selected-btn" disabled>
+                                <i class="bi bi-cash-coin me-1"></i>
+                                Ausgewählte bezahlen
+                            </button>
+                            <button class="btn btn-success" id="pay-all-btn" {% if not unpaid_items %}disabled{% endif %}>
+                                <i class="bi bi-cash-stack me-1"></i>
+                                Alle bezahlen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toast-title">Benachrichtigung</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-message">
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirm-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bestätigung</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-message"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-primary" id="confirm-button">Bestätigen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/kassensystem.js') }}"></script>
+</body>
+</html>

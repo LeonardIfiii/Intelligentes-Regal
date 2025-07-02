@@ -1,0 +1,143 @@
+/* Custom styles for the warehouse dashboard */
+body {
+    background-color: #f5f5f5;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+}
+
+.card-header {
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+/* Status light styles */
+.status-light {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 0 auto;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.status-critical {
+    background-color: #dc3545;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.7);
+    animation: pulse-red 2s infinite;
+}
+
+.status-warning {
+    background-color: #fd7e14;
+    box-shadow: 0 0 8px rgba(253, 126, 20, 0.7);
+}
+
+.status-ok {
+    background-color: #198754;
+    box-shadow: 0 0 8px rgba(25, 135, 84, 0.7);
+}
+
+@keyframes pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+/* Row coloring by status */
+tr.status-critical {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+tr.status-warning {
+    background-color: rgba(253, 126, 20, 0.1);
+}
+
+/* Animation for rows */
+@keyframes highlight {
+    0% { background-color: rgba(255, 251, 0, 0.3); }
+    100% { background-color: transparent; }
+}
+
+tr.highlight {
+    animation: highlight 2s ease-out;
+}
+
+/* Button and filter styles */
+.filter-buttons .btn {
+    margin-left: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.filter-buttons .btn.active {
+    font-weight: bold;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+.verify-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.task-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.task-checkbox:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar-text {
+        display: none;
+    }
+    
+    .filter-buttons {
+        margin-top: 10px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .filter-buttons {
+        margin-top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .filter-buttons .btn {
+        flex-grow: 1;
+        margin: 0 2px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
