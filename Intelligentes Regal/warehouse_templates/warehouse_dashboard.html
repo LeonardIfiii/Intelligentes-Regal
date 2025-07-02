@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Dashboard - Intelligent Shelf System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/warehouse_style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-box-seam me-2"></i>
+                Warehouse Dashboard - Intelligent Shelf System
+            </a>
+            <div class="navbar-text text-light" id="status-display">
+                <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Connected</span>
+                <span class="ms-2">Last Update: <span id="last-update">{{ last_update }}</span></span>
+                <span class="ms-2">Runtime: <span id="runtime">{{ runtime }}</span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-list-check me-2"></i>
+                            Warehouse Restocking Tasks
+                        </h5>
+                        <div class="filter-buttons">
+                            <button class="btn btn-sm btn-light status-filter active" data-status="all">All</button>
+                            <button class="btn btn-sm btn-danger status-filter" data-status="critical">Critical</button>
+                            <button class="btn btn-sm btn-warning status-filter" data-status="warning">Warning</button>
+                            <button class="btn btn-sm btn-success status-filter" data-status="ok">OK</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="warehouse-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 60px">Status</th>
+                                        <th>Warehouse&nbsp;Rack</th>
+                                        <th>Sales&nbsp;Rack</th>
+                                        <th>Product</th>
+                                        <th>Current Stock</th>
+                                        <th>Refill Qty</th>
+                                        <th>Collected</th>
+                                        <th>Refilled</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in warehouse_data %}
+                                    <tr class="status-{{ item.status }}" data-sales-rack="{{ item.sales_rack }}" data-product-type="{{ item.product_type }}">
+                                        <td class="text-center">
+                                            <div class="status-light status-{{ item.status }}" 
+                                                 title="{{ item.status|capitalize }}"></div>
+                                        </td>
+                                        <td>{{ item.warehouse_rack }}</td>
+                                        <td>{{ item.sales_rack }}</td>
+                                        <td>{{ item.product_type }}</td>
+                                        <td>{{ item.current_count }}</td>
+                                        <td>{{ item.refill_quantity }}</td>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input task-checkbox" 
+                                                   data-field="collected" 
+                                                   {% if item.collected %}checked{% endif %}>
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input task-checkbox" 
+                                                   data-field="refilled" 
+                                                   {% if item.refilled %}checked{% endif %}
+                                                   {% if not item.collected %}disabled{% endif %}>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary verify-btn"
+                                                    {% if not item.refilled %}disabled{% endif %}>
+                                                <i class="bi bi-eye"></i> Verify
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-center">
+                        <button class="btn btn-primary" id="refresh-inventory-btn">
+                            <i class="bi bi-arrow-clockwise me-1"></i>
+                            Refresh Inventory
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toastTitle">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/warehouse_dashboard.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+    <title>{{ product.name }} | Intelligentes Regal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tablet_style.css') }}">
+</head>
+<body class="product-screen">
+    <div class="container-fluid h-100 p-4">
+        <div class="screen-header d-flex justify-content-between align-items-center mb-4">
+            <div class="screen-title">
+                <h1>Produktinformationen</h1>
+            </div>
+        </div>
+
+        <div class="main-content pt-3">
+            <div class="product-info-card">
+                <h2 class="product-name">{{ product.name }}</h2>
+                <div class="product-price mb-3">{{ product.price }}{{ product.currency }}</div>
+                
+                <div class="product-description mb-4">
+                    {{ product.description }}
+                </div>
+                
+                <!-- Produktspezifikationen -->
+                <div class="specs-container mb-4">
+                    <div class="spec-row">
+                        <div class="spec-label">Material:</div>
+                        <div class="spec-value">{{ product.material }}</div>
+                    </div>
+                    <div class="spec-row">
+                        <div class="spec-label">Pflege:</div>
+                        <div class="spec-value">{{ product.care }}</div>
+                    </div>
+                </div>
+                
+                <!-- Bestandsinformation -->
+                <div class="stock-info-container {% if product.stock_info.count <= 0 %}out-of-stock{% endif %}">
+                    <div class="stock-header">
+                        <i class="bi {% if product.stock_info.count > 0 %}bi-check-circle-fill{% else %}bi-exclamation-circle-fill{% endif %}"></i>
+                        <h3>Verfügbarkeit</h3>
+                    </div>
+                    
+                    {% if product.stock_info.count > 0 %}
+                    <div class="stock-details">
+                        <div class="stock-status stock-{{ product.stock_info.level }}">{{ product.stock_info.status }}</div>
+                        <div class="stock-message">{{ product.stock_info.message }}</div>
+                    </div>
+                    {% else %}
+                    <div class="restock-info">
+                        <div class="stock-status stock-out">{{ product.stock_info.status }}</div>
+                        <div class="restock-message">{{ product.restock_message }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Timer-Anzeige -->
+            <div class="timer-container mt-4">
+                <div class="timer-progress" id="timer-bar" style="width: {{ (product.remaining_seconds / 15) * 100 }}%"></div>
+                <div class="timer-text">Ansicht wird in <span id="timer-seconds">{{ product.remaining_seconds }}</span> Sekunden zurückgesetzt</div>
+            </div>
+            
+            <!-- Test-Link zurück zur Startseite -->
+            <div class="text-center mt-3">
+                <a href="/" class="btn btn-sm btn-outline-secondary">Zurück zur Startseite</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Einfacher Countdown-Timer
+        let seconds = {{ product.remaining_seconds }};
+        const timerElement = document.getElementById('timer-seconds');
+        const timerBar = document.getElementById('timer-bar');
+        
+        const interval = setInterval(function() {
+            seconds--;
+            if (seconds <= 0) {
+                clearInterval(interval);
+                window.location.href = '/';
+            } else {
+                timerElement.textContent = seconds;
+                timerBar.style.width = ((seconds / 15) * 100) + '%';
+            }
+        }, 1000);
+        
+        // Sicherstellen, dass wir nach 15 Sekunden definitiv zurück zur Startseite gehen
+        setTimeout(function() {
+            window.location.href = '/';
+        }, {{ product.remaining_seconds }} * 1000);
+    </script>
+</body>
+</html>

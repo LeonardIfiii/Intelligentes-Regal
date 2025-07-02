@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezept-Ideen | Smart Shelf</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tablet_style.css') }}">
+</head>
+<body class="product-screen recipe-screen">
+    <div class="container-fluid h-100 p-4">
+        <div class="screen-header d-flex justify-content-between align-items-center mb-3">
+            <div class="screen-title">
+                <h1>Ideen & Rezepte</h1>
+            </div>
+            <div class="screen-indicator">
+                <span class="indicator"></span>
+                <span class="indicator"></span>
+                <span class="indicator active"></span>
+            </div>
+        </div>
+
+        {% if product.recipes %}
+        {% set recipe = product.recipes[0] %}
+        <div class="row h-85">
+            <div class="col-md-6">
+                <div class="recipe-image-container">
+                    <img src="{{ url_for('static', filename='img/' + recipe.image) }}" alt="{{ recipe.title }}" 
+                         onerror="this.src='{{ url_for('static', filename='img/placeholder.jpg') }}'">
+                </div>
+                
+                <div class="recipe-metadata">
+                    <div class="recipe-meta-item">
+                        <i class="bi bi-clock"></i>
+                        <span>{{ recipe.time }}</span>
+                    </div>
+                    <div class="recipe-meta-item">
+                        <i class="bi bi-bar-chart"></i>
+                        <span>{{ recipe.difficulty }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="recipe-details">
+                    <h2 class="recipe-title">{{ recipe.title }}</h2>
+                    
+                    <div class="recipe-section">
+                        <h3 class="recipe-section-title">
+                            <i class="bi bi-basket"></i>
+                            Zutaten
+                        </h3>
+                        <ul class="recipe-ingredients">
+                            {% for ingredient in recipe.ingredients %}
+                            <li>{{ ingredient }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="recipe-section">
+                        <h3 class="recipe-section-title">
+                            <i class="bi bi-list-ol"></i>
+                            Zubereitung
+                        </h3>
+                        <ol class="recipe-steps">
+                            {% for step in recipe.steps %}
+                            <li>{{ step }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Timer-Anzeige -->
+            <div class="col-12">
+                <div class="timer-container mt-4">
+                    <div class="timer-progress" id="timer-bar"></div>
+                    <div class="timer-text">Ansicht wird in <span id="timer-seconds">{{ product.remaining_seconds }}</span> Sekunden zurückgesetzt</div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-recipes">
+            <i class="bi bi-exclamation-circle"></i>
+            <p>Keine Rezepte verfügbar für dieses Produkt.</p>
+            
+            <!-- Timer-Anzeige -->
+            <div class="timer-container mt-4">
+                <div class="timer-progress" id="timer-bar"></div>
+                <div class="timer-text">Ansicht wird in <span id="timer-seconds">{{ product.remaining_seconds }}</span> Sekunden zurückgesetzt</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/tablet_display.js') }}"></script>
+</body>
+</html>
